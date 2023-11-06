@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, HTTPException, Depends, status, Query
+from fastapi import APIRouter, HTTPException, Depends, status, Query, Path
 
 from src.database.connect_db import AsyncDBSession, get_session
 from src.schemas import ContactModel, ContactResponse
@@ -24,9 +24,9 @@ async def read_contacts(
     )
 
 
-@router.get("/birthdays-7-days", response_model=List[ContactResponse])
-async def read_contacts_with_birthdays_in_7_days(
-    n: int = Query(default=7, ge=1, le=62),
+@router.get("/birthdays-in-{n}-days", response_model=List[ContactResponse])
+async def read_contacts_with_birthdays_in_n_days(
+    n: int = Path(ge=1, le=62),
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=10, ge=1, le=1000),
     session: AsyncDBSession = Depends(get_session),
