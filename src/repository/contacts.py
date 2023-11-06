@@ -10,7 +10,7 @@ from src.schemas import ContactModel
 from src.repository.is_leap_year import is_leap_year
 
 
-async def get_contacts(
+async def read_contacts(
     offset: int,
     limit: int,
     first_name: str,
@@ -30,7 +30,8 @@ async def get_contacts(
     return contacts.scalars()
 
 
-async def get_contacts_with_birthdays_in_7_days(
+async def read_contacts_with_birthdays_in_n_days(
+    n: int,
     offset: int,
     limit: int,
     session: AsyncDBSession,
@@ -61,19 +62,19 @@ async def get_contacts_with_birthdays_in_7_days(
                 - current_date
             )
         delta_days = date_delta.days
-        if delta_days <= -359:
+        if delta_days < n - 365:
             delta_days += 365 + is_leap_year_flag
-        if 0 <= delta_days <= 6:
+        if delta_days in range(n):
             tmp[delta_days].append(contact)
 
     result = []
-    for delta_days in range(7):
+    for delta_days in range(n):
         result = result + tmp[delta_days]
 
     return result[offset:limit]
 
 
-async def get_contact(contact_id: int, session: AsyncDBSession) -> Contact | None:
+async def read_contact(contact_id: int, session: AsyncDBSession) -> Contact | None:
     stmt = select(Contact).filter(Contact.id == contact_id)
     contact = await session.execute(stmt)
     return contact.scalar()
@@ -112,7 +113,7 @@ async def update_contact(
     return contact
 
 
-async def remove_contact(contact_id: int, session: AsyncDBSession) -> Contact | None:
+async def delete_contact(contact_id: int, session: AsyncDBSession) -> Contact | None:
     stmt = select(Contact).filter(Contact.id == contact_id)
     result = await session.execute(stmt)
     contact = result.scalar()
