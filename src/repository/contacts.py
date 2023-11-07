@@ -7,7 +7,7 @@ from sqlalchemy import select
 from src.database.connect_db import AsyncDBSession
 from src.database.models import Contact
 from src.schemas import ContactModel
-from src.repository.is_leap_year import is_leap_year
+from src.utils.is_leap_year import is_leap_year
 
 
 async def read_contacts(
